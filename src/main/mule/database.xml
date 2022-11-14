@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="685781e6-6c0a-4162-8224-5ec804bdc0cb" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="5f6f4964-66d3-456a-b302-66e86f8de9f7" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="university" />
+	</db:config>
+	<db:config name="Database_Config1" doc:name="Database Config" doc:id="6f255d14-ba44-4594-949c-743dad8cda14" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="university" />
+	</db:config>
+	<db:config name="Database_Config2" doc:name="Database Config" doc:id="30cb7cdd-2657-4424-9477-4cb94682b86e" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="demart" />
+	</db:config>
+	<flow name="databaseFlow" doc:id="b13b4367-abda-442c-bfc9-b5611dcd5e27" >
+		<http:listener doc:name="Listener" doc:id="072c7d7e-d9bc-4750-9124-d8a96e9339a6" config-ref="HTTP_Listener_config" path="/database"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="a00d5c31-ce08-4f27-8698-a7ed7920f2e9" >
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="d28be43f-5c77-4975-9f9f-31343af63dd2" name="table1"/>
+			</route>
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="4f262876-c232-4a98-9dae-2d0f2a85c842" name="table2"/>
+			</route>
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="dc618f50-b7f7-49d9-af61-c151039bba8d" name="table3"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="e5970b86-e666-4095-aa10-5bc8e2ff9755">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+flatten(payload..payload)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+	</flow>
+	<flow name="table1" doc:id="04b1ff7d-88ef-45a5-b65a-af1fcfef49bc" >
+		<db:select doc:name="tableflow1" doc:id="a490f65a-1055-4480-9326-8003f3e18269" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from employe]]></db:sql>
+		</db:select>
+	</flow>
+	<flow name="table2" doc:id="5788e0f9-2f63-4301-a6b4-3a512a0c1a87" >
+		<db:select doc:name="Select" doc:id="c50eda71-b4d0-4e66-88a6-549171bb31bd" config-ref="Database_Config1">
+			<db:sql ><![CDATA[select * from students]]></db:sql>
+		</db:select>
+	</flow>
+	<flow name="table3" doc:id="fb4c94cb-fb23-46da-9793-767e3d2045c9" >
+		<db:select doc:name="Select" doc:id="58ca362a-123c-41d6-b3ac-d59e23621b00" config-ref="Database_Config2">
+			<db:sql ><![CDATA[select * from products]]></db:sql>
+		</db:select>
+	</flow>
+</mule>
